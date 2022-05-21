@@ -16,11 +16,11 @@ contract TelfordSource {
     event TransferRequestBonded(address indexed _userDestinationAddress);
     event BonderReimbursed(uint256 indexed bonderPayment);
 
-    modifier OnlyL1Relayer() {
+    modifier onlyL1Relayer() {
         // to do
         _;
     }
-    modifier OnlyBonder() {
+    modifier onlyBonder() {
         // to do
         _;
     }
@@ -37,7 +37,7 @@ contract TelfordSource {
         emit BridgeRequested(_requestedTransferAmount);
     }
 
-    function bond(address _reimbursementAddress) external OnlyBonder {
+    function bond(address _reimbursementAddress) external onlyBonder {
         _bonderReimbursementAddress = _reimbursementAddress;
         _bonderPayment = _requestedTransferAmount + bonderFee;
         //
@@ -46,7 +46,7 @@ contract TelfordSource {
         emit TransferRequestBonded(_userDestinationAddress);
     }
 
-    function fundsReceivedOnDestination() external OnlyL1Relayer {
+    function fundsReceivedOnDestination() external onlyL1Relayer {
         //
         // To Do. logic to transfer the _bonderPayment to the _bonderReimbursementAddress on Arbitrum from this contract.
         //
