@@ -1,6 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 require('solidity-coverage');
 require('dotenv').config();
+require('hardhat-watcher');
 
 // Web3 Provider Keys
 const ARBITRUM_RINKEBY_ALCHEMY_KEY = process.env.ARBITRUM_RINKEBY_ALCHEMY_API_KEY;
@@ -27,6 +28,11 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   solidity: "0.8.4",
+  watcher: {
+    compilation: {
+      tasks: ['compile'],
+    },
+  },
   networks: {
     arbitrum_rinkeby: {
       url: `https://arb-rinkeby.g.alchemy.com/v2/${ARBITRUM_RINKEBY_ALCHEMY_KEY}`,

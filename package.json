@@ -18,10 +18,12 @@
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.5",
     "hardhat": "^2.9.5",
+    "hardhat-console": "^1.0.0",
     "hardhat-watcher": "^2.3.0",
     "solidity-coverage": "^0.7.21"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0",
     "dotenv": "^16.0.1"
   }
 }
