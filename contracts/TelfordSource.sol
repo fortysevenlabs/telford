@@ -3,9 +3,7 @@ pragma solidity ^0.8.0;
 
 contract TelfordSource {
     // this contract will be deployed to Arbitrum
-    address private userSourceAddress;
-    address private userDestinationAddress;
-    address private bonderReimbursementAddress;
+    address private userAddress;
     address private bonderClient;
     address private l1Relayer;
 
@@ -15,7 +13,7 @@ contract TelfordSource {
     uint256 constant bonderFee = 0.2 ether;
 
     event BridgeRequested(uint256 indexed amount);
-    event TransferRequestBonded(address indexed userDestinationAddress);
+    event TransferRequestBonded(address indexed userAddress);
     event BonderReimbursed(uint256 indexed bonderPayment);
 
     modifier onlyL1Relayer() {
@@ -38,30 +36,24 @@ contract TelfordSource {
         l1Relayer = _l1RelayerAddress;
     }
 
-    function bridge(
-        uint256 _amount,
-        address _userSourceAddr,
-        address _userDestinationAddr
-    ) external {
-        userSourceAddress = _userSourceAddr;
-        userDestinationAddress = _userDestinationAddr;
+    function bridge(uint256 _amount) external {
+        userAddress = msg.sender;
         requestedTransferAmount = _amount;
 
         emit BridgeRequested(requestedTransferAmount);
     }
 
-    function bond(address _reimbursementAddress) external onlyBonder {
-        bonderReimbursementAddress = _reimbursementAddress;
+    function bond() external onlyBonder {
         bonderPayment = requestedTransferAmount + bonderFee;
         //
-        // To Do. logic to transfer the _bonderPayment from the _userSourceAddress on Arbitrum to the contract account.
+        // To Do. logic to transfer the _bonderPayment from the _userAddress on Arbitrum to the contract account.
         //
-        emit TransferRequestBonded(userDestinationAddress);
+        emit TransferRequestBonded(userAddress);
     }
 
     function fundsReceivedOnDestination() external onlyL1Relayer {
         //
-        // To Do. logic to transfer the _bonderPayment to the _bonderReimbursementAddress on Arbitrum from this contract.
+        // To Do. logic to transfer the _bonderPayment to the _bonderClient on Arbitrum from this contract.
         //
         emit BonderReimbursed(bonderPayment);
     }
