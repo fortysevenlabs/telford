@@ -15,14 +15,15 @@ describe("TelfordSource", function () {
 		account1 = accounts[1];
 		account2 = accounts[2];
 		account3 = accounts[3];
+
+		const TelfordSource = await ethers.getContractFactory("TelfordSource");
+		telfordSource = await TelfordSource.deploy(account1.address, account2.address);
+		
+		await telfordSource.deployed();
 	});
 
 	describe("bridge", function () {
 		it("should emit an event", async function () {
-			const TelfordSource = await ethers.getContractFactory("TelfordSource");
-			telfordSource = await TelfordSource.deploy(account1.address, account2.address);
-			await telfordSource.deployed();
-
 			await expect(telfordSource.connect(owner).bridge(12345))
 				.to.emit(telfordSource, "BridgeRequested")
 				.withArgs(12345);
@@ -31,19 +32,11 @@ describe("TelfordSource", function () {
 
 	describe("bond", function () {
 		it("should revert when not called by a bonder", async function () {
-			const TelfordSource = await ethers.getContractFactory("TelfordSource");
-			telfordSource = await TelfordSource.deploy(account1.address, account2.address);
-			await telfordSource.deployed();
-
 			await expect(telfordSource.connect(owner).bond())
 				.to.be.revertedWith("Sorry pal, I can only be called by the Bonder!");
 		});
 
 		it("should emit an event", async function () {
-			const TelfordSource = await ethers.getContractFactory("TelfordSource");
-			telfordSource = await TelfordSource.deploy(account1.address, account2.address);  
-			await telfordSource.deployed();
-
 			await telfordSource.connect(owner).bridge(12345);
 
 			await expect(telfordSource.connect(account1).bond())
@@ -54,10 +47,6 @@ describe("TelfordSource", function () {
 
 	describe("fundsReceivedOnDestination", function () {
 		it("should revert when not called by the L1Relayer", async function () {
-			const TelfordSource = await ethers.getContractFactory("TelfordSource");
-			telfordSource = await TelfordSource.deploy(account1.address, account2.address);
-			await telfordSource.deployed();
-
 			await telfordSource.connect(owner).bridge(12345);
 			await telfordSource.connect(account1).bond()
 
@@ -66,10 +55,6 @@ describe("TelfordSource", function () {
 		});
 
 		it("should emit an event", async function () {
-			const TelfordSource = await ethers.getContractFactory("TelfordSource");
-			telfordSource = await TelfordSource.deploy(account1.address, account2.address);
-			await telfordSource.deployed();
-
 			await telfordSource.connect(owner).bridge(12345);
 			await telfordSource.connect(account1).bond()
 
