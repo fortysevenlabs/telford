@@ -3,26 +3,39 @@ pragma solidity ^0.8.0;
 
 contract TelfordSource {
     // this contract will be deployed to Arbitrum
-    address private _userSourceAddress;
-    address private _userDestinationAddress;
-    address private _bonderReimbursementAddress;
+    address private userSourceAddress;
+    address private userDestinationAddress;
+    address private bonderReimbursementAddress;
+    address private bonderClient;
+    address private l1Relayer;
 
-    uint256 private _requestedTransferAmount;
-    uint256 private _bonderPayment;
+    uint256 private requestedTransferAmount;
+    uint256 private bonderPayment;
 
     uint256 constant bonderFee = 0.2 ether;
 
     event BridgeRequested(uint256 indexed amount);
-    event TransferRequestBonded(address indexed _userDestinationAddress);
+    event TransferRequestBonded(address indexed userDestinationAddress);
     event BonderReimbursed(uint256 indexed bonderPayment);
 
     modifier onlyL1Relayer() {
-        // to do
+        require(
+            msg.sender == l1Relayer,
+            "Sorry pal, I can only be called by the L1Relayer!"
+        );
         _;
     }
     modifier onlyBonder() {
-        // to do
+        require(
+            msg.sender == bonderClient,
+            "Sorry pal, I can only be called by the Bonder!"
+        );
         _;
+    }
+
+    constructor(address _bonderClientAddress, address _l1RelayerAddress) {
+        bonderClient = _bonderClientAddress;
+        l1Relayer = _l1RelayerAddress;
     }
 
     function bridge(
@@ -30,26 +43,26 @@ contract TelfordSource {
         address _userSourceAddr,
         address _userDestinationAddr
     ) external {
-        _userSourceAddress = _userSourceAddr;
-        _userDestinationAddress = _userDestinationAddr;
-        _requestedTransferAmount = _amount;
+        userSourceAddress = _userSourceAddr;
+        userDestinationAddress = _userDestinationAddr;
+        requestedTransferAmount = _amount;
 
-        emit BridgeRequested(_requestedTransferAmount);
+        emit BridgeRequested(requestedTransferAmount);
     }
 
     function bond(address _reimbursementAddress) external onlyBonder {
-        _bonderReimbursementAddress = _reimbursementAddress;
-        _bonderPayment = _requestedTransferAmount + bonderFee;
+        bonderReimbursementAddress = _reimbursementAddress;
+        bonderPayment = requestedTransferAmount + bonderFee;
         //
         // To Do. logic to transfer the _bonderPayment from the _userSourceAddress on Arbitrum to the contract account.
         //
-        emit TransferRequestBonded(_userDestinationAddress);
+        emit TransferRequestBonded(userDestinationAddress);
     }
 
     function fundsReceivedOnDestination() external onlyL1Relayer {
         //
         // To Do. logic to transfer the _bonderPayment to the _bonderReimbursementAddress on Arbitrum from this contract.
         //
-        emit BonderReimbursed(_bonderPayment);
+        emit BonderReimbursed(bonderPayment);
     }
 }
