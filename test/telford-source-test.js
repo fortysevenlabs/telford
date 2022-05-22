@@ -7,8 +7,6 @@ describe("TelfordSource", function () {
 	let account1;
 	let account2;
 	let account3;
-	let stubbedAddress1;
-	let stubbedAddress2;
 
 	beforeEach("setup accounts", async () => {
 		const accounts = await ethers.getSigners();
