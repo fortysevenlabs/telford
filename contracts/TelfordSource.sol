@@ -3,14 +3,14 @@ pragma solidity ^0.8.0;
 
 contract TelfordSource {
     // this contract will be deployed to Arbitrum
-    address private userAddress;
-    address private bonderAddress;
+    address payable private bonderAddress;
     address private l1Relayer;
-    uint256 constant bonderFee = 0.2 ether;
     uint256 private bonderPayment;
+    uint256 private bridgeAmount;
 
-    event BridgeRequested(uint256 indexed amount);
-    event TransferRequestBonded(address indexed userAddress);
+    uint256 constant BONDER_FEE = 0.2 ether;
+
+    event BridgeRequested(address indexed userAddress, uint256 indexed amount);
     event BonderReimbursed(uint256 indexed bonderPayment);
 
     modifier onlyL1Relayer() {
@@ -20,39 +20,28 @@ contract TelfordSource {
         );
         _;
     }
-    modifier onlyBonder() {
-        require(
-            msg.sender == bonderAddress,
-            "Sorry pal, I can only be called by the Bonder!"
-        );
-        _;
-    }
 
     constructor(address _bonderAddress, address _l1RelayerAddress) {
-        bonderAddress = _bonderAddress;
+        bonderAddress = payable(_bonderAddress);
         l1Relayer = _l1RelayerAddress;
     }
 
-    function bridge(uint256 _amount) external {
-        userAddress = msg.sender;
-        bonderPayment = _amount + bonderFee;
-        //
-        // To Do. Access the WETH contract, and approve this contract address to transfer bonderPayment from userAddress.
-        //
-        emit BridgeRequested(_amount);
-    }
+    function bridge() external payable {
+        require(
+            msg.value > BONDER_FEE,
+            "Sorry pal, you gotta send more ether to cover the bonder fee!"
+        );
 
-    function bond() external onlyBonder {
-        //
-        // To Do. logic to transfer the bonderPayment from the userAddress to this contract address.
-        //
-        emit TransferRequestBonded(userAddress);
+        bonderPayment = msg.value;
+        bridgeAmount = bonderPayment - BONDER_FEE;
+
+        emit BridgeRequested(msg.sender, msg.value);
     }
 
     function fundsReceivedOnDestination() external onlyL1Relayer {
-        //
-        // To Do. logic to transfer the bonderPayment from this contract address to the bonderAddress.
-        //
+        (bool sent, ) = bonderAddress.call{value: bonderPayment}("");
+        require(sent, "Failed to send Ether to bonder");
+
         emit BonderReimbursed(bonderPayment);
     }
 }

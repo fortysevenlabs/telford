@@ -23,44 +23,32 @@ describe("TelfordSource", function () {
 	});
 
 	describe("bridge", function () {
-		it("should emit an event", async function () {
-			await expect(telfordSource.connect(owner).bridge(12345))
-				.to.emit(telfordSource, "BridgeRequested")
-				.withArgs(12345);
-		});
-	});
-
-	describe("bond", function () {
 		it("should revert when not called by a bonder", async function () {
-			await expect(telfordSource.connect(owner).bond())
-				.to.be.revertedWith("Sorry pal, I can only be called by the Bonder!");
+			await expect(telfordSource.connect(owner).bridge({value: 0}))
+				.to.be.revertedWith("Sorry pal, you gotta send more ether to cover the bonder fee!");
 		});
 
 		it("should emit an event", async function () {
-			await telfordSource.connect(owner).bridge(12345);
-
-			await expect(telfordSource.connect(account1).bond())
-				.to.emit(telfordSource, "TransferRequestBonded")
-				.withArgs(owner.address);
+			await expect(telfordSource.connect(owner).bridge({value: 1000000000000000000n}))
+				.to.emit(telfordSource, "BridgeRequested")
+				.withArgs(owner.address, 1000000000000000000n);
 		});
 	});
 
 	describe("fundsReceivedOnDestination", function () {
 		it("should revert when not called by the L1Relayer", async function () {
-			await telfordSource.connect(owner).bridge(12345);
-			await telfordSource.connect(account1).bond()
+			await telfordSource.connect(owner).bridge({value: 1000000000000000000n});
 
 			await expect(telfordSource.connect(account3).fundsReceivedOnDestination())
 				.to.be.revertedWith("Sorry pal, I can only be called by the L1Relayer!");
 		});
 
 		it("should emit an event", async function () {
-			await telfordSource.connect(owner).bridge(12345);
-			await telfordSource.connect(account1).bond()
+			await telfordSource.connect(owner).bridge({value: 1000000000000000000n});
 
 			await expect(telfordSource.connect(account2).fundsReceivedOnDestination())
 				.to.emit(telfordSource, "BonderReimbursed")
-				.withArgs(200000000000012345n);
+				.withArgs(1000000000000000000n);
 		});
 	});
 });
