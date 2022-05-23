@@ -31,13 +31,13 @@ module.exports = {
     hardhat: {
 		chainId: 1337,
 	},
-    // arbitrum_rinkeby: {
-    //   url: `https://arb-rinkeby.g.alchemy.com/v2/${ARBITRUM_RINKEBY_ALCHEMY_KEY}`,
-    //   accounts: [`${WALLET_PRIVATE_KEY}`]
-    // },
-    // optimism_kovan: {
-    //   url: `https://opt-kovan.g.alchemy.com/v2/${OPTIMISM_KOVAN_ALCHEMY_KEY}`,
-    //   accounts: [`${WALLET_PRIVATE_KEY}`]
-    // }
+    arbitrum_rinkeby: {
+      url: `https://arb-rinkeby.g.alchemy.com/v2/${ARBITRUM_RINKEBY_ALCHEMY_KEY}`,
+      accounts: [`${WALLET_PRIVATE_KEY}`]
+    },
+    optimism_kovan: {
+      url: `https://opt-kovan.g.alchemy.com/v2/${OPTIMISM_KOVAN_ALCHEMY_KEY}`,
+      accounts: [`${WALLET_PRIVATE_KEY}`]
+    }
   }
 };
