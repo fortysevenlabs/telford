@@ -35,7 +35,7 @@ contract TelfordSource {
         bonderPayment = msg.value;
         bridgeAmount = bonderPayment - BONDER_FEE;
 
-        emit BridgeRequested(msg.sender, msg.value);
+        emit BridgeRequested(msg.sender, bridgeAmount);
     }
 
     function fundsReceivedOnDestination() external onlyL1Relayer {

@@ -31,7 +31,7 @@ describe("TelfordSource", function () {
 		it("should emit an event", async function () {
 			await expect(telfordSource.connect(owner).bridge({value: 1000000000000000000n}))
 				.to.emit(telfordSource, "BridgeRequested")
-				.withArgs(owner.address, 1000000000000000000n);
+				.withArgs(owner.address, 800000000000000000n);
 		});
 	});
 
