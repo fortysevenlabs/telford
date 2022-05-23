@@ -29,7 +29,7 @@ contract TelfordSource {
     function bridge() external payable {
         require(
             msg.value > BONDER_FEE,
-            "Sorry pal, you gotta send more ether to cover the bonder fee!"
+            "Ether sent must be greater than the bonder fee!"
         );
 
         bonderPayment = msg.value;

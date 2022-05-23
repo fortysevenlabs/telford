@@ -23,9 +23,9 @@ describe("TelfordSource", function () {
 	});
 
 	describe("bridge", function () {
-		it("should revert when not called by a bonder", async function () {
+		it("should revert when ether sent is less than or equal to the bonder fee", async function () {
 			await expect(telfordSource.connect(owner).bridge({value: 0}))
-				.to.be.revertedWith("Sorry pal, you gotta send more ether to cover the bonder fee!");
+				.to.be.revertedWith("Ether sent must be greater than the bonder fee!");
 		});
 
 		it("should emit an event", async function () {
