@@ -1,10 +1,14 @@
 require("@nomiclabs/hardhat-waffle");
+require("hardhat-watcher");
 require('solidity-coverage');
 require('dotenv').config();
+require("hardhat-tracer");
 
 // Web3 Provider Keys
 const ARBITRUM_RINKEBY_ALCHEMY_KEY = process.env.ARBITRUM_RINKEBY_ALCHEMY_API_KEY;
 const OPTIMISM_KOVAN_ALCHEMY_KEY = process.env.OPTIMISM_KOVAN_ALCHEMY_API_KEY;
+const ROPSTEN_INFURA_KEY = process.env.ROPSTEN_INFURA_API_KEY;
+const KOVAN_INFURA_KEY = process.env.KOVAN_INFURA_API_KEY;
 
 // Wallet Private Keys
 const WALLET_PRIVATE_KEY = process.env.DEV_WALLET_PRIVATE_KEY;
@@ -27,6 +31,17 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   solidity: "0.8.4",
+  watcher: {
+    c: {
+      tasks: ['compile'],
+    },
+    c: {
+      tasks: ['test'],
+    },
+    cct: {
+      tasks: ['clean', 'compile', 'test'],
+    },
+  },
   networks: {
     arbitrum_rinkeby: {
       url: `https://arb-rinkeby.g.alchemy.com/v2/${ARBITRUM_RINKEBY_ALCHEMY_KEY}`,
@@ -34,6 +49,14 @@ module.exports = {
     },
     optimism_kovan: {
       url: `https://opt-kovan.g.alchemy.com/v2/${OPTIMISM_KOVAN_ALCHEMY_KEY}`,
+      accounts: [`${WALLET_PRIVATE_KEY}`]
+    },
+    kovan: {
+      url: `https://kovan.infura.io/v3/${KOVAN_INFURA_KEY}`,
+      accounts: [`${WALLET_PRIVATE_KEY}`]
+    },
+    ropsten: {
+      url: `https://ropsten.infura.io/v3/${ROPSTEN_INFURA_KEY}`,
       accounts: [`${WALLET_PRIVATE_KEY}`]
     }
   }
