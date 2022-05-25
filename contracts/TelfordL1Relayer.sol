@@ -21,17 +21,17 @@ contract L1Relayer {
     address private owner;
     IInbox public inboxArbitrum =
         IInbox(0x578BAde599406A8fE3d24Fd7f7211c0911F5B29e); // Address of the Arbitrum Inbox on the L1 chain
-    address public crossDomainMessangerOptimism =
+    address public crossDomainMessengerOptimism =
         0x4361d0F75A0186C05f971c566dC6bEa5957483fD;
-    ICrossDomainMessenger public crossDomainMessanger =
-        ICrossDomainMessenger(crossDomainMessanger);
+    ICrossDomainMessenger public crossDomainMessenger =
+        ICrossDomainMessenger(crossDomainMessenger);
 
     /* ========== Constants ========== */
 
     address public constant TELFORD_SOURCE =
         0xD2dB8075693aA6A0D5C026cdf319D517516c1D40; // Address of Telford source on the testnet
     address public TELFORD_DESTINATION =
-        crossDomainMessanger.xDomainMessageSender(); // Will update it to hardcode
+        crossDomainMessenger.xDomainMessageSender(); // Will update it to hardcode
 
     /* ========== Events ========== */
 
@@ -56,8 +56,8 @@ contract L1Relayer {
 
     modifier onlyTelfordDestination() {
         require(
-            msg.sender == crossDomainMessangerOptimism &&
-                crossDomainMessanger.xDomainMessageSender() ==
+            msg.sender == crossDomainMessengerOptimism &&
+                crossDomainMessenger.xDomainMessageSender() ==
                 TELFORD_DESTINATION,
             "Only the Telford Destination Contract can perform this operation!"
         );
@@ -85,7 +85,7 @@ contract L1Relayer {
         amount = _amount;
         transferId = _transferId;
         emit updatedInfo(_bonder, _user, _amount, _transferId);
-        _relayToArbitrum(10000000000000000, 0, 0);
+        relayToArbitrum(10000000000000000, 0, 0);
     }
 
     /* ========== Sending Function ========== */
@@ -98,7 +98,7 @@ contract L1Relayer {
      * @param gasPriceBid price bid for L2 execution
      */
 
-    function _relayToArbitrum(
+    function relayToArbitrum(
         uint256 maxSubmissionCost,
         uint256 maxGas,
         uint256 gasPriceBid
