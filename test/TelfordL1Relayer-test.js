@@ -54,12 +54,12 @@ describe("L1Relayer", async () => {
         it("should emit an event", async () => {
             await expect(l1Relayer.connect(optimismMessenger).relayToArbitrum(maxSubmissionCost, maxGas, gasPriceBid))
                 .to.emit(l1Relayer, "RetryableTicketCreated")
-                .withArgs(); // Does anyone know how to call on a variable if it's inside a function? looking for the tokenID within the function
+                .withArgs(); // TO DO: mock the function that returns the ticketID
         });
 
         it("should return ticketID", async () => {
             await expect(l1Relayer.connect(optimismMessenger).relayToArbitrum(maxSubmissionCost, maxGas, gasPriceBid))
-                .to.equal() // Does anyone know how to call on a variable if it's inside a function? looking for the tokenID within the function
+                .to.equal() // TO DO: mock the function that returns the ticketID
         });
     });
 

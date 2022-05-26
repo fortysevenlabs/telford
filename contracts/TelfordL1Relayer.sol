@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.8.13;
 
-import "hardhat/console.sol";
 import {ICrossDomainMessenger} from "@eth-optimism/contracts/libraries/bridge/ICrossDomainMessenger.sol";
 import "arb-bridge-eth/contracts/bridge/Inbox.sol";
 import "./TelfordSource.sol";
@@ -19,23 +18,14 @@ contract L1Relayer {
     uint256 public amount;
     uint256 public transferId;
     address private owner;
-    IInbox public inboxArbitrum =
-        IInbox(0x578BAde599406A8fE3d24Fd7f7211c0911F5B29e); // Address of the Arbitrum Inbox on the L1 chain
-    address public crossDomainMessengerOptimism =
-        0x4361d0F75A0186C05f971c566dC6bEa5957483fD;
+    IInbox public inboxArbitrum; // Address of the Arbitrum Inbox on the L1 chain
+    address public crossDomainMessengerOptimism;
     ICrossDomainMessenger public crossDomainMessenger =
         ICrossDomainMessenger(crossDomainMessenger);
 
-    /* ========== Constants ========== */
-
-    address public constant TELFORD_SOURCE =
-        0xD2dB8075693aA6A0D5C026cdf319D517516c1D40; // Address of Telford source on the testnet
-    address public TELFORD_DESTINATION =
-        crossDomainMessenger.xDomainMessageSender(); // Will update it to hardcode
-
     /* ========== Events ========== */
 
-    event updatedInfo(
+    event ReceivedDestinationTransfer(
         address bonder,
         address user,
         uint256 amount,
@@ -47,6 +37,8 @@ contract L1Relayer {
 
     constructor() public {
         owner = msg.sender;
+        inboxArbitrum = IInbox(0x578BAde599406A8fE3d24Fd7f7211c0911F5B29e);
+        crossDomainMessengerOptimism = 0x4361d0F75A0186C05f971c566dC6bEa5957483fD;
     }
 
     modifier onlyOwner() {
@@ -58,7 +50,7 @@ contract L1Relayer {
         require(
             msg.sender == crossDomainMessengerOptimism &&
                 crossDomainMessenger.xDomainMessageSender() ==
-                TELFORD_DESTINATION,
+                TELFORD_DESTINATION //NEED TO UPDATE TO TELFORD DESTINATION ADDRESS ONCE KNOWN,
             "Only the Telford Destination Contract can perform this operation!"
         );
         _;
@@ -84,7 +76,7 @@ contract L1Relayer {
         userAddress = _user;
         amount = _amount;
         transferId = _transferId;
-        emit updatedInfo(_bonder, _user, _amount, _transferId);
+        emit ReceivedDestinationTransfer(_bonder, _user, _amount, _transferId);
         relayToArbitrum(10000000000000000, 0, 0);
     }
 
@@ -102,7 +94,8 @@ contract L1Relayer {
         uint256 maxSubmissionCost,
         uint256 maxGas,
         uint256 gasPriceBid
-    ) public payable returns (uint256) {
+    ) public returns (uint256) {
+        address TELFORD_SOURCE = 0xD2dB8075693aA6A0D5C026cdf319D517516c1D40;
         bytes memory data = abi.encodeWithSelector(
             TelfordSource.fundsReceivedOnDestination.selector
         );
@@ -131,5 +124,18 @@ contract L1Relayer {
 
     function withdrawEther() public onlyOwner {
         msg.sender.transfer(address(this).balance);
+    }
+
+    /* ========== Update Functions ========== */
+
+    function updateInboxArbitrum(address _address) external onlyOwner {
+        inboxArbitrum = IInbox(_address);
+    }
+
+    function updateCrossDomainMessengerOptimism(address _address)
+        external
+        onlyOwner
+    {
+        crossDomainMessengerOptimism = _address;
     }
 }
