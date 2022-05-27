@@ -76,7 +76,7 @@ contract L1Relayer {
         address _user,
         uint256 _bridgeAmount,
         uint256 _transferId
-    ) external onlyTelfordDestination {
+    ) public onlyTelfordDestination {
         transfers[_transferId] = _bridgeAmount;
         emit ReceivedDestinationTransfer(
             _bonder,
@@ -89,7 +89,7 @@ contract L1Relayer {
 
     /* ========== Sending Function ========== */
 
-    /**
+    /*
      * @dev Function that is called on the final step of accepting the distribution from Telford's Optimism contract,
      * It's purpose is to send a Retryable Ticket which will call on Telford's Arbitrum fundsReceivedOnDestination function
      * @param _transferId Number to keep track of the transfer in progress, it's forwarded to Telford's Arbitrum fundsReceivedOnDestination function
@@ -139,6 +139,7 @@ contract L1Relayer {
             value: address(this).balance,
             gas: 35000
         }("");
+        require(success == true, "Withdrawal failed!");
     }
 
     /* ========== Setter Functions ========== */

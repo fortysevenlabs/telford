@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@eth-optimism/smock": "^1.1.10",
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "chai": "^4.3.6",
@@ -23,14 +24,14 @@
     "solidity-coverage": "^0.7.21"
   },
   "dependencies": {
-    "dotenv": "^8.2.0",
+    "@arbitrum/sdk": "^2.0.0",
     "@eth-optimism/contracts": "^0.5.14",
     "@eth-optimism/sdk": "^1.0.1",
     "@openzeppelin/contracts": "3.4.2",
     "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@^4.3.2",
     "@openzeppelin/contracts-upgradeable": "3.4.2",
     "arb-bridge-eth": "^0.7.5",
-    "@arbitrum/sdk": "^2.0.0",
-    "arbos-precompiles": "^1.0.2"
+    "arbos-precompiles": "^1.0.2",
+    "dotenv": "^8.2.0"
   }
 }

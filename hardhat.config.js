@@ -3,6 +3,7 @@ require('solidity-coverage');
 require('dotenv').config();
 require('hardhat-watcher');
 
+
 // Web3 Provider Keys
 const ARBITRUM_RINKEBY_ALCHEMY_KEY = process.env.ARBITRUM_RINKEBY_ALCHEMY_API_KEY;
 const OPTIMISM_KOVAN_ALCHEMY_KEY = process.env.OPTIMISM_KOVAN_ALCHEMY_API_KEY;
@@ -33,6 +34,7 @@ module.exports = {
       tasks: ['compile'],
     },
   },
+  defaultNetwork: "hardhat",
   networks: {
     arbitrum_rinkeby: {
       url: `https://arb-rinkeby.g.alchemy.com/v2/${ARBITRUM_RINKEBY_ALCHEMY_KEY}`,
