@@ -6,6 +6,8 @@ contract TelfordSource {
     address payable private bonderAddress;
     address private l1Relayer;
 
+    address private owner;
+
     uint256 constant BONDER_FEE = 0.2 ether;
 
     struct BridgeInfo {
@@ -24,6 +26,14 @@ contract TelfordSource {
     );
     event BonderReimbursed(uint256 bonderPayment);
 
+    modifier onlyOwner() {
+        require(
+            msg.sender == owner,
+            "Sorry pal, I can only be called by the contract owner!"
+        );
+        _;
+    }
+
     modifier onlyL1Relayer() {
         require(
             msg.sender == l1Relayer,
@@ -33,6 +43,7 @@ contract TelfordSource {
     }
 
     constructor(address _bonderAddress, address _l1RelayerAddress) {
+        owner = msg.sender;
         bonderAddress = payable(_bonderAddress);
         l1Relayer = _l1RelayerAddress;
     }
@@ -67,9 +78,19 @@ contract TelfordSource {
 
         uint256 bonderPayment = bridgeRequests[_transferId].bonderPayment;
 
-        (bool sent, ) = bonderAddress.call{value: bonderPayment}("");
+        (bool sent, ) = bridgeRequests[_transferId].bonderAddress.call{
+            value: bonderPayment
+        }("");
         require(sent, "Failed to send Ether to bonder");
 
         emit BonderReimbursed(bonderPayment);
+    }
+
+    function setBonder(address _bonder) external onlyOwner {
+        bonderAddress = payable(_bonder);
+    }
+
+    function setL1Relayer(address _l1Relayer) external onlyOwner {
+        l1Relayer = _l1Relayer;
     }
 }
