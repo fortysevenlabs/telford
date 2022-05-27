@@ -24,29 +24,36 @@ describe("TelfordSource", function () {
 
 	describe("bridge", function () {
 		it("should revert when ether sent is less than or equal to the bonder fee", async function () {
-			await expect(telfordSource.connect(user).bridge())
+			await expect(telfordSource.connect(user).bridge(1))
 				.to.be.revertedWith("Ether sent must be greater than the bonder fee!");
 		});
 
 		it("should emit an event", async function () {
-			await expect(telfordSource.connect(user).bridge({value: 1000000000000000000n}))
+			await expect(telfordSource.connect(user).bridge(1, {value: 1000000000000000000n}))
 				.to.emit(telfordSource, "BridgeRequested")
-				.withArgs(user.address, 800000000000000000n);
+				.withArgs(user.address, 800000000000000000n, 1);
 		});
 	});
 
 	describe("fundsReceivedOnDestination", function () {
 		it("should revert when not called by the L1Relayer", async function () {
-			await telfordSource.connect(user).bridge({value: 1000000000000000000n});
+			await telfordSource.connect(user).bridge(1, {value: 1000000000000000000n});
 
-			await expect(telfordSource.connect(otherAccount).fundsReceivedOnDestination())
+			await expect(telfordSource.connect(otherAccount).fundsReceivedOnDestination(1, 800000000000000000n))
 				.to.be.revertedWith("Sorry pal, I can only be called by the L1Relayer!");
 		});
 
-		it("should emit an event", async function () {
-			await telfordSource.connect(user).bridge({value: 1000000000000000000n});
+		it("should revert when transferId and bridgeAmount dont match up", async function () {
+			await telfordSource.connect(user).bridge(1, {value: 1000000000000000000n});
 
-			await expect(telfordSource.connect(l1Relayer).fundsReceivedOnDestination())
+			await expect(telfordSource.connect(l1Relayer).fundsReceivedOnDestination(2, 800000000000000000n))
+				.to.be.revertedWith("UH OH! The transferId and bridgeAmount dont match!");
+		});
+
+		it("should emit an event", async function () {
+			await telfordSource.connect(user).bridge(1, {value: 1000000000000000000n});
+
+			await expect(telfordSource.connect(l1Relayer).fundsReceivedOnDestination(1, 800000000000000000n))
 				.to.emit(telfordSource, "BonderReimbursed")
 				.withArgs(1000000000000000000n);
 		});

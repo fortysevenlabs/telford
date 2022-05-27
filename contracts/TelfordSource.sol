@@ -5,12 +5,23 @@ contract TelfordSource {
     // this contract will be deployed to Arbitrum
     address payable private bonderAddress;
     address private l1Relayer;
-    uint256 private bonderPayment;
-    uint256 private bridgeAmount;
 
     uint256 constant BONDER_FEE = 0.2 ether;
 
-    event BridgeRequested(address userAddress, uint256 amount);
+    struct BridgeInfo {
+        address userAddress; // msg.sender in bridge
+        address bonderAddress; // bonderAddress in constuctor
+        uint256 bridgeAmount; // msg.value in bridge
+        uint256 bonderPayment;
+    }
+
+    mapping(uint => BridgeInfo) private bridgeRequests;
+
+    event BridgeRequested(
+        address userAddress,
+        uint256 amount,
+        uint256 transferId
+    );
     event BonderReimbursed(uint256 bonderPayment);
 
     modifier onlyL1Relayer() {
@@ -26,19 +37,36 @@ contract TelfordSource {
         l1Relayer = _l1RelayerAddress;
     }
 
-    function bridge() external payable {
+    function bridge(uint256 _transferId) external payable {
         require(
             msg.value > BONDER_FEE,
             "Ether sent must be greater than the bonder fee!"
         );
 
-        bonderPayment = msg.value;
-        bridgeAmount = bonderPayment - BONDER_FEE;
+        uint256 bonderPayment = msg.value;
+        uint256 bridgeAmount = bonderPayment - BONDER_FEE;
 
-        emit BridgeRequested(msg.sender, bridgeAmount);
+        bridgeRequests[_transferId] = BridgeInfo({
+            userAddress: msg.sender,
+            bonderAddress: bonderAddress,
+            bridgeAmount: bridgeAmount,
+            bonderPayment: bonderPayment
+        });
+
+        emit BridgeRequested(msg.sender, bridgeAmount, _transferId);
     }
 
-    function fundsReceivedOnDestination() external onlyL1Relayer {
+    function fundsReceivedOnDestination(
+        uint256 _transferId,
+        uint256 _bridgeAmount
+    ) external onlyL1Relayer {
+        require(
+            bridgeRequests[_transferId].bridgeAmount == _bridgeAmount,
+            "UH OH! The transferId and bridgeAmount dont match!"
+        );
+
+        uint256 bonderPayment = bridgeRequests[_transferId].bonderPayment;
+
         (bool sent, ) = bonderAddress.call{value: bonderPayment}("");
         require(sent, "Failed to send Ether to bonder");
 
