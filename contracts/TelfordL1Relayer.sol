@@ -13,12 +13,11 @@ import "./TelfordSource.sol";
 contract L1Relayer {
     /* ========== State ========== */
 
-    address public bonderAddress;
-    address public userAddress;
-    uint256 public amount;
-    uint256 public transferId;
+    mapping(uint256 => uint256) public transfers;
     address private owner;
-    IInbox public inboxArbitrum; // Address of the Arbitrum Inbox on the L1 chain
+    address private telfordSource;
+    address private telfordDestination;
+    IInbox public inboxArbitrum;
     address public crossDomainMessengerOptimism;
     ICrossDomainMessenger public crossDomainMessenger =
         ICrossDomainMessenger(crossDomainMessenger);
@@ -26,19 +25,24 @@ contract L1Relayer {
     /* ========== Events ========== */
 
     event ReceivedDestinationTransfer(
-        address bonder,
+        address indexed bonder,
         address user,
-        uint256 amount,
-        uint256 transferId
+        uint256 indexed bridgeAmount,
+        uint256 indexed transferId
     );
     event RetryableTicketCreated(uint256 indexed ticketId);
 
     /* ========== Modifier / Constructor ========== */
 
-    constructor() public {
+    constructor(
+        address _telfordSouceAddress,
+        address _telfordDestinationAddress
+    ) public {
         owner = msg.sender;
         inboxArbitrum = IInbox(0x578BAde599406A8fE3d24Fd7f7211c0911F5B29e);
         crossDomainMessengerOptimism = 0x4361d0F75A0186C05f971c566dC6bEa5957483fD;
+        telfordSource = _telfordSouceAddress;
+        telfordDestination = _telfordDestinationAddress;
     }
 
     modifier onlyOwner() {
@@ -50,7 +54,7 @@ contract L1Relayer {
         require(
             msg.sender == crossDomainMessengerOptimism &&
                 crossDomainMessenger.xDomainMessageSender() ==
-                TELFORD_DESTINATION //NEED TO UPDATE TO TELFORD DESTINATION ADDRESS ONCE KNOWN,
+                telfordDestination,
             "Only the Telford Destination Contract can perform this operation!"
         );
         _;
@@ -60,24 +64,27 @@ contract L1Relayer {
 
     /**
      * @dev Function that is called on by Optimism's messagers contract via Telford's destination contract
+     * it's purpose is to emit the ReceivedDestinationTransfer event and call on the relayToArbitrum contract to forward the message
      * @param _bonder The address of the bonder who provided liquidity for the transaction
      * @param _user The address of the user who is bridging
-     * @param _amount The amount the user is bridging (sub fees for the bonder)
+     * @param _bridgeAmount The amount the user is bridging (sub fees for the bonder)
      * @param _transferId Number to keep track of the transfer in progress
      */
 
     function receiveDestinationTransferConfirmation(
         address _bonder,
         address _user,
-        uint256 _amount,
+        uint256 _bridgeAmount,
         uint256 _transferId
     ) external onlyTelfordDestination {
-        bonderAddress = _bonder;
-        userAddress = _user;
-        amount = _amount;
-        transferId = _transferId;
-        emit ReceivedDestinationTransfer(_bonder, _user, _amount, _transferId);
-        relayToArbitrum(10000000000000000, 0, 0);
+        transfers[_transferId] = _bridgeAmount;
+        emit ReceivedDestinationTransfer(
+            _bonder,
+            _user,
+            _bridgeAmount,
+            _transferId
+        );
+        relayToArbitrum(_transferId, _bridgeAmount, 10000000000000000, 0, 0);
     }
 
     /* ========== Sending Function ========== */
@@ -85,24 +92,29 @@ contract L1Relayer {
     /**
      * @dev Function that is called on the final step of accepting the distribution from Telford's Optimism contract,
      * It's purpose is to send a Retryable Ticket which will call on Telford's Arbitrum fundsReceivedOnDestination function
+     * @param _transferId Number to keep track of the transfer in progress, it's forwarded to Telford's Arbitrum fundsReceivedOnDestination function
+     * @param _bridgeAmount The amount the user is bridging (sub fees for the bonder), it's forwarded to Telford's Arbitrum fundsReceivedOnDestination function
      * @param maxSubmissionCost Max gas deducted from user's L2 balance to cover base submission fee
      * @param maxGas Max gas deducted from user's L2 balance to cover L2 execution
      * @param gasPriceBid price bid for L2 execution
      */
 
     function relayToArbitrum(
+        uint256 transferId,
+        uint256 bridgeAmount,
         uint256 maxSubmissionCost,
         uint256 maxGas,
         uint256 gasPriceBid
-    ) public returns (uint256) {
-        address TELFORD_SOURCE = 0xD2dB8075693aA6A0D5C026cdf319D517516c1D40;
+    ) public payable returns (uint256) {
         bytes memory data = abi.encodeWithSelector(
-            TelfordSource.fundsReceivedOnDestination.selector
+            TelfordSource.fundsReceivedOnDestination.selector,
+            transferId,
+            bridgeAmount
         );
         uint256 ticketID = inboxArbitrum.createRetryableTicket{
             value: msg.value
         }(
-            TELFORD_SOURCE,
+            telfordSource,
             0,
             maxSubmissionCost,
             msg.sender,
@@ -118,24 +130,43 @@ contract L1Relayer {
 
     /* ========== Receive Fallback & Withdrawl Function ========== */
 
-    // Functions are used so the owner can deposit / withdraw ETH for gas
+    // Functions are used so the owner can deposit / withdraw ETH for gas to pay for the retryable ticket creation
 
     receive() external payable {}
 
     function withdrawEther() public onlyOwner {
-        msg.sender.transfer(address(this).balance);
+        (bool success, ) = msg.sender.call{
+            value: address(this).balance,
+            gas: 35000
+        }("");
     }
 
-    /* ========== Update Functions ========== */
+    /* ========== Setter Functions ========== */
 
-    function updateInboxArbitrum(address _address) external onlyOwner {
-        inboxArbitrum = IInbox(_address);
-    }
-
-    function updateCrossDomainMessengerOptimism(address _address)
+    function setInboxArbitrum(address _inboxArbitrumAddress)
         external
         onlyOwner
     {
-        crossDomainMessengerOptimism = _address;
+        inboxArbitrum = IInbox(_inboxArbitrumAddress);
+    }
+
+    function setCrossDomainMessengerOptimism(
+        address _crossDomainMessengerOptimismAddress
+    ) external onlyOwner {
+        crossDomainMessengerOptimism = _crossDomainMessengerOptimismAddress;
+    }
+
+    function setTelfordSource(address _telfordSourceAddress)
+        external
+        onlyOwner
+    {
+        telfordSource = _telfordSourceAddress;
+    }
+
+    function setTelfordDestination(address _telfordDestinationAddress)
+        external
+        onlyOwner
+    {
+        telfordDestination = _telfordDestinationAddress;
     }
 }
