@@ -10,8 +10,8 @@ contract TelfordSource {
 
     uint256 constant BONDER_FEE = 0.2 ether;
 
-    event BridgeRequested(address indexed userAddress, uint256 indexed amount);
-    event BonderReimbursed(uint256 indexed bonderPayment);
+    event BridgeRequested(address userAddress, uint256 amount);
+    event BonderReimbursed(uint256 bonderPayment);
 
     modifier onlyL1Relayer() {
         require(
