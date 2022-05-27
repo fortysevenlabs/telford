@@ -10,7 +10,7 @@ contract TelfordSource {
 
     address private owner;
 
-    uint256 constant BONDER_FEE = 0.2 ether;
+    uint256 constant BONDER_FEE = 0.0002 ether;
 
     struct BridgeInfo {
         address userAddress;

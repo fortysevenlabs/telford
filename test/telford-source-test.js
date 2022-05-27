@@ -9,7 +9,7 @@ describe("TelfordSource", function () {
 	let otherAccount;
 
 	let bridgeAmount  = ethers.utils.parseEther("0.8");
-	let bonderPayment = ethers.utils.parseEther("1");
+	let bonderPayment = ethers.utils.parseEther("0.8002");
 
 	beforeEach("setup accounts", async () => {
 		const accounts = await ethers.getSigners();
