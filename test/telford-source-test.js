@@ -8,6 +8,9 @@ describe("TelfordSource", function () {
 	let l1Relayer;
 	let otherAccount;
 
+	let bridgeAmount  = ethers.utils.parseEther("0.8");
+	let bonderPayment = ethers.utils.parseEther("1");
+
 	beforeEach("setup accounts", async () => {
 		const accounts = await ethers.getSigners();
 
@@ -28,34 +31,48 @@ describe("TelfordSource", function () {
 				.to.be.revertedWith("Ether sent must be greater than the bonder fee!");
 		});
 
+		it("should successfully deposit 1 ETH into contract, from user", async () => {
+            const contractAddress = telfordSource.address;
+            const tx = await telfordSource.connect(user).bridge(1, {value: bonderPayment});
+            expect(tx).to.changeEtherBalances([user, contractAddress], [ethers.utils.parseEther("-1"), bonderPayment]);
+        });
+
 		it("should emit an event", async function () {
-			await expect(telfordSource.connect(user).bridge(1, {value: 1000000000000000000n}))
+			await expect(telfordSource.connect(user).bridge(1, {value: bonderPayment}))
 				.to.emit(telfordSource, "BridgeRequested")
-				.withArgs(user.address, 800000000000000000n, 1);
+				.withArgs(user.address, bridgeAmount, 1);
 		});
 	});
 
 	describe("fundsReceivedOnDestination", function () {
 		it("should revert when not called by the L1Relayer", async function () {
-			await telfordSource.connect(user).bridge(1, {value: 1000000000000000000n});
+			await telfordSource.connect(user).bridge(1, {value: bonderPayment});
 
-			await expect(telfordSource.connect(otherAccount).fundsReceivedOnDestination(1, 800000000000000000n))
+			await expect(telfordSource.connect(otherAccount).fundsReceivedOnDestination(1, bridgeAmount))
 				.to.be.revertedWith("Sorry pal, I can only be called by the L1Relayer!");
 		});
 
 		it("should revert when transferId and bridgeAmount dont match up", async function () {
-			await telfordSource.connect(user).bridge(1, {value: 1000000000000000000n});
+			await telfordSource.connect(user).bridge(1, {value: bonderPayment});
 
-			await expect(telfordSource.connect(l1Relayer).fundsReceivedOnDestination(2, 800000000000000000n))
+			await expect(telfordSource.connect(l1Relayer).fundsReceivedOnDestination(2, bridgeAmount))
 				.to.be.revertedWith("UH OH! The transferId and bridgeAmount dont match!");
 		});
 
-		it("should emit an event", async function () {
-			await telfordSource.connect(user).bridge(1, {value: 1000000000000000000n});
+		it("should successfully deposit 1 ETH into bonder account, from contract", async () => {
+            const contractAddress = telfordSource.address;
+			await telfordSource.connect(user).bridge(1, {value: bonderPayment});
 
-			await expect(telfordSource.connect(l1Relayer).fundsReceivedOnDestination(1, 800000000000000000n))
+            const tx = await telfordSource.connect(l1Relayer).fundsReceivedOnDestination(1, bridgeAmount);
+            expect(tx).to.changeEtherBalances([contractAddress, bonder], [ethers.utils.parseEther("-1"), bonderPayment]);
+        });
+
+		it("should emit an event", async function () {
+			await telfordSource.connect(user).bridge(1, {value: bonderPayment});
+
+			await expect(telfordSource.connect(l1Relayer).fundsReceivedOnDestination(1, bridgeAmount))
 				.to.emit(telfordSource, "BonderReimbursed")
-				.withArgs(1000000000000000000n);
+				.withArgs(bonderPayment);
 		});
 	});
 });
