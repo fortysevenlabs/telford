@@ -9,9 +9,9 @@ contract TelfordSource {
     uint256 constant BONDER_FEE = 0.2 ether;
 
     struct BridgeInfo {
-        address userAddress; // msg.sender in bridge
-        address bonderAddress; // bonderAddress in constuctor
-        uint256 bridgeAmount; // msg.value in bridge
+        address userAddress;
+        address bonderAddress;
+        uint256 bridgeAmount;
         uint256 bonderPayment;
     }
 
