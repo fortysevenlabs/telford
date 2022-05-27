@@ -6,6 +6,8 @@ contract TelfordSource {
     address payable private bonderAddress;
     address private l1Relayer;
 
+    uint256 private transferId;
+
     address private owner;
 
     uint256 constant BONDER_FEE = 0.2 ether;
@@ -24,7 +26,7 @@ contract TelfordSource {
         uint256 amount,
         uint256 transferId
     );
-    event BonderReimbursed(uint256 bonderPayment);
+    event BonderReimbursed(uint256 bonderPayment, uint256 transferId);
 
     modifier onlyOwner() {
         require(
@@ -48,7 +50,7 @@ contract TelfordSource {
         l1Relayer = _l1RelayerAddress;
     }
 
-    function bridge(uint256 _transferId) external payable {
+    function bridge() external payable {
         require(
             msg.value > BONDER_FEE,
             "Ether sent must be greater than the bonder fee!"
@@ -57,14 +59,16 @@ contract TelfordSource {
         uint256 bonderPayment = msg.value;
         uint256 bridgeAmount = bonderPayment - BONDER_FEE;
 
-        bridgeRequests[_transferId] = BridgeInfo({
+        ++transferId;
+
+        bridgeRequests[transferId] = BridgeInfo({
             userAddress: msg.sender,
             bonderAddress: bonderAddress,
             bridgeAmount: bridgeAmount,
             bonderPayment: bonderPayment
         });
 
-        emit BridgeRequested(msg.sender, bridgeAmount, _transferId);
+        emit BridgeRequested(msg.sender, bridgeAmount, transferId);
     }
 
     function fundsReceivedOnDestination(
@@ -83,7 +87,7 @@ contract TelfordSource {
         }("");
         require(sent, "Failed to send Ether to bonder");
 
-        emit BonderReimbursed(bonderPayment);
+        emit BonderReimbursed(bonderPayment, transferId);
     }
 
     function setBonder(address _bonder) external onlyOwner {
