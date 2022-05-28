@@ -1,46 +1,12 @@
-require("@nomiclabs/hardhat-waffle");
-require('solidity-coverage');
-require('dotenv').config();
-require('hardhat-watcher');
-
-// Web3 Provider Keys
-const ARBITRUM_RINKEBY_ALCHEMY_KEY = process.env.ARBITRUM_RINKEBY_ALCHEMY_API_KEY;
-const OPTIMISM_KOVAN_ALCHEMY_KEY = process.env.OPTIMISM_KOVAN_ALCHEMY_API_KEY;
-
-// Wallet Private Keys
-const WALLET_PRIVATE_KEY = process.env.DEV_WALLET_PRIVATE_KEY;
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
-
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.8.4",
-  watcher: {
-    compilation: {
-      tasks: ['compile'],
-    },
-  },
-  networks: {
-    arbitrum_rinkeby: {
-      url: `https://arb-rinkeby.g.alchemy.com/v2/${ARBITRUM_RINKEBY_ALCHEMY_KEY}`,
-      accounts: [`${WALLET_PRIVATE_KEY}`]
-    },
-    optimism_kovan: {
-      url: `https://opt-kovan.g.alchemy.com/v2/${OPTIMISM_KOVAN_ALCHEMY_KEY}`,
-      accounts: [`${WALLET_PRIVATE_KEY}`]
-    }
-  }
+  solidity: "0.7.3",
+  wssSource : "",
+  telfordSourceAddress : "0x756AB0fFA89f683AaD597b786e88a28D2b31ee0B",
+  bridgeRequestedEventTopic : "0x05a5ddd55d3ee0917a93dae8216432109f76bf3125ed9e74e55c60045c9a1307",
+  BONDER_PRIVATE_KEY : "",
+  TelfordDestinationAddress: "",
+  TelfordDestinationABI: ,
 };
