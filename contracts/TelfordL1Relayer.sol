@@ -10,12 +10,13 @@ import "./TelfordSource.sol";
  * and sending (relaying) a message to the TelfordSource contract on Arbitrum
  */
 
-contract L1Relayer is TelfordSource {
+contract L1Relayer {
     /* ========== State ========== */
 
     mapping(uint256 => uint256) public transfers;
     address private owner;
     address private telfordSource;
+    TelfordSource public telfordSourceContract;
     address private telfordDestination;
     IInbox public inboxArbitrum;
     address public crossDomainMessengerOptimism;
@@ -41,6 +42,7 @@ contract L1Relayer is TelfordSource {
         owner = msg.sender;
         inboxArbitrum = IInbox(0x578BAde599406A8fE3d24Fd7f7211c0911F5B29e);
         crossDomainMessengerOptimism = 0x4361d0F75A0186C05f971c566dC6bEa5957483fD;
+        telfordSourceContract = TelfordSource(_telfordSouceAddress);
         telfordSource = _telfordSouceAddress;
         telfordDestination = _telfordDestinationAddress;
     }
@@ -107,7 +109,7 @@ contract L1Relayer is TelfordSource {
         uint256 gasPriceBid
     ) public payable returns (uint256) {
         bytes memory data = abi.encodeWithSelector(
-            TelfordSource.fundsReceivedOnDestination.selector,
+            telfordSourceContract.fundsReceivedOnDestination.selector,
             transferId,
             bridgeAmount
         );

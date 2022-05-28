@@ -7,6 +7,7 @@ require('hardhat-watcher');
 // Web3 Provider Keys
 const ARBITRUM_RINKEBY_ALCHEMY_KEY = process.env.ARBITRUM_RINKEBY_ALCHEMY_API_KEY;
 const OPTIMISM_KOVAN_ALCHEMY_KEY = process.env.OPTIMISM_KOVAN_ALCHEMY_API_KEY;
+const KOVAN_ALCHEMY_KEY = process.env.KOVAN_URL;
 
 // Wallet Private Keys
 const WALLET_PRIVATE_KEY = process.env.DEV_WALLET_PRIVATE_KEY;
@@ -42,6 +43,10 @@ module.exports = {
     },
     optimism_kovan: {
       url: `https://opt-kovan.g.alchemy.com/v2/${OPTIMISM_KOVAN_ALCHEMY_KEY}`,
+      accounts: [`${WALLET_PRIVATE_KEY}`]
+    },
+    kovan: {
+      url: `https://kovan.infura.io/v3/${KOVAN_ALCHEMY_KEY}`,
       accounts: [`${WALLET_PRIVATE_KEY}`]
     }
   }

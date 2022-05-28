@@ -5,10 +5,10 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Winter is coming!");
+  const L1Relayer = await ethers.getContractFactory("TelfordSource");
+  const l1Relayer = await L1Relayer.deploy("0x842C4B03c18c9148532E5519FAe97991aCCBEcA8", "0x842C4B03c18c9148532E5519FAe97991aCCBEcA8");
 
-  console.log("Greeter address:", greeter.address);
+  console.log("L1Relayer address:", l1Relayer.address);
 }
 
 main()
