@@ -10,8 +10,6 @@ contract TelfordDestination {
     address public bonder;
 
     // L2 -> L1 messaging
-    // address l2CrossDomainMessengerAddress = 0x4200000000000000000000000000000000000007;
-    // address l1RelayerAddress = 0xb5cf88Df79CfdFe52572C5F015017fe486979b61;
     address public l2CrossDomainMessenger;
     address public l1Relayer;
 
@@ -43,7 +41,7 @@ contract TelfordDestination {
     // format: transferId, amount, sender_address, receiver_address, other_addresses
     event TransferFromBonder(uint256 transferId, uint256 amount, address bonder, address contractAddr, address user);
     event TransferToUser(uint256 transferId, uint256 amount, address contractAddr, address user, address bonder);
-    event RelayedTransferConfirmation(uint256 transferId, uint256 amount, address bonder, address user, address contractAddr);
+    event RelayTransferConfirmation(uint256 transferId, uint256 amount, address bonder, address user, address contractAddr);
 
     function depositAndDistribute(
         address _user,
@@ -65,6 +63,8 @@ contract TelfordDestination {
         );
 
         _distribute(_transferId, msg.value, msg.sender, _user);
+
+        _relayTransferConfirmation(_transferId, msg.value, msg.sender, _user, contractAddr);
     }
 
     /* private functions */
@@ -87,10 +87,7 @@ contract TelfordDestination {
             _user,
             _bonder
         );
-
-        _relayTransferConfirmation(_transferId, _amount, _bonder, _user, contractAddr);
     }
-
 
     function _relayTransferConfirmation(
         uint256 _transferId,
@@ -102,19 +99,18 @@ contract TelfordDestination {
     private
     {
         ICrossDomainMessenger(l2CrossDomainMessenger).sendMessage(
-            l1Relayer, 
+            l1Relayer,
             abi.encodeWithSignature(
                 "receiveDestinationTransferConfirmation(address,address,string,uint256,uint256)",
                 _transferId,
                 _amount,
                 _bonder,
-                _user,
-                _contract
-            ), 
+                _user
+            ),
             100000
         );
 
-            emit RelayedTransferConfirmation(
+            emit RelayTransferConfirmation(
                 _transferId,
                 _amount,
                 _bonder,
@@ -123,7 +119,6 @@ contract TelfordDestination {
             );
     }
 
-    // we need the ability to update bonder, crossdomanl2messenger, l1relayer
     /* helper functions */
     function setBonder(address _bonder) external onlyOwner {
         bonder = _bonder;

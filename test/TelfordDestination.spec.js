@@ -42,7 +42,7 @@ describe("TelfordDestination", async () => {
             // pre-tx balances
             const bonderPrevBalance = await bonder.getBalance();
             const contractPrevBalance = await ethers.provider.getBalance(contractAddress);;
-            const userPrevBalance = await bonder.getBalance();
+            const userPrevBalance = await user.getBalance();
 
             const tx = await telfordDestination.connect(bonder).depositAndDistribute(user.address, bridgeRequestId, {value: depositAmount});
 
@@ -60,12 +60,28 @@ describe("TelfordDestination", async () => {
             const tx = telfordDestination.connect(bonder).depositAndDistribute(user.address, bridgeRequestId, {value: depositAmount});
             const contractAddress = telfordDestination.address;
 
-            
             await expect(tx)
                 .to.emit(telfordDestination, "TransferFromBonder")
                 .withArgs(bridgeRequestId, depositAmount, bonder.address, contractAddress, user.address)
         });
 
+        it("should emit TransferToUser event", async () => {
+            const tx = telfordDestination.connect(bonder).depositAndDistribute(user.address, bridgeRequestId, {value: depositAmount});
+            const contractAddress = telfordDestination.address;
+
+            await expect(tx)
+                .to.emit(telfordDestination, "TransferToUser")
+                .withArgs(bridgeRequestId, depositAmount, contractAddress, user.address, bonder.address)
+        });
+
+        it("should emit a RelayTransferConfirmation event", async () => {
+            const tx = telfordDestination.connect(bonder).depositAndDistribute(user.address, bridgeRequestId, {value: depositAmount});
+            const contractAddress = telfordDestination.address;
+
+            await expect(tx)
+                .to.emit(telfordDestination, "RelayTransferConfirmation")
+                .withArgs(bridgeRequestId, depositAmount, bonder.address, user.address, contractAddress)
+        });
 
     });
 });
