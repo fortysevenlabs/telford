@@ -10,7 +10,7 @@ import "./TelfordSource.sol";
  * and sending (relaying) a message to the TelfordSource contract on Arbitrum
  */
 
-contract L1Relayer {
+contract L1Relayer is TelfordSource {
     /* ========== State ========== */
 
     mapping(uint256 => uint256) public transfers;
