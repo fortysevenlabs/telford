@@ -85,18 +85,3 @@ describe("TelfordDestination", async () => {
 
     });
 });
-
-// todo: How should we approach unit tests for private methods?
-// - test _distribute()
-// - test emitted event TransferToUser()
-// - test _relayTransferConfirmation()
-// - test emitted event RelayTransferConfirmation()
-// 
-// https://ethereum.stackexchange.com/a/38162
-// internal - inhert and test
-// private - (option 1) make them public/internal, test and change them back
-//           (option 2) move private funcs to library, import to contract. this makes them public to contract but not exposed in actual contract
-
-// todo: How do we stub calls to x-chain?
-// - x-chain contract call "relayTransferConfirmation" fail in the above unit tests
-// - x-chain contract doesn't exist from the perspective of the testing lib
