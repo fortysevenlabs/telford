@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity >=0.6.0 <0.8.13;
 
 contract TelfordSource {
     // this contract will be deployed to Arbitrum
