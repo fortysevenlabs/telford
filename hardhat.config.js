@@ -1,27 +1,18 @@
 require("@nomiclabs/hardhat-waffle");
+require("hardhat-watcher");
+require("hardhat-tracer");
 require('solidity-coverage');
 require('dotenv').config();
-require('hardhat-watcher');
 
 // Web3 Provider Keys
+const ETH_MAINNET_ALCHEMY_KEY = process.env.ETH_MAINNET_ALCHEMY_API_KEY;
+const ROPSTEN_INFURA_KEY = process.env.ROPSTEN_INFURA_API_KEY;
 const ARBITRUM_RINKEBY_ALCHEMY_KEY = process.env.ARBITRUM_RINKEBY_ALCHEMY_API_KEY;
 const OPTIMISM_KOVAN_ALCHEMY_KEY = process.env.OPTIMISM_KOVAN_ALCHEMY_API_KEY;
+const KOVAN_INFURA_KEY = process.env.KOVAN_INFURA_API_KEY;
 
 // Wallet Private Keys
 const WALLET_PRIVATE_KEY = process.env.DEV_WALLET_PRIVATE_KEY;
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -29,14 +20,34 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 module.exports = {
   solidity: "0.8.4",
   watcher: {
-    compilation: {
+    c: {
       tasks: ['compile'],
+    },
+    c: {
+      tasks: ['test'],
+    },
+    cct: {
+      tasks: ['clean', 'compile', 'test'],
     },
   },
   networks: {
-    hardhat: {
-		chainId: 1337,
-	},
+    mainnet: {
+      url: `https://eth-mainnet.alchemyapi.io/v2/${ETH_MAINNET_ALCHEMY_KEY}`,
+      accounts: [`${WALLET_PRIVATE_KEY}`]
+    },
+    kovan: {
+      url: `https://kovan.infura.io/v3/${KOVAN_INFURA_KEY}`,
+      accounts: [`${WALLET_PRIVATE_KEY}`]
+    },
+    ropsten: {
+      url: `https://ropsten.infura.io/v3/${ROPSTEN_INFURA_KEY}`,
+      accounts: [`${WALLET_PRIVATE_KEY}`]
+    },
+    networks: {
+      hardhat: {
+        chainId: 1337,
+      },
+    },
     arbitrum_rinkeby: {
       url: `https://arb-rinkeby.g.alchemy.com/v2/${ARBITRUM_RINKEBY_ALCHEMY_KEY}`,
       accounts: [`${WALLET_PRIVATE_KEY}`]
