@@ -43,6 +43,11 @@ module.exports = {
       url: `https://ropsten.infura.io/v3/${ROPSTEN_INFURA_KEY}`,
       accounts: [`${WALLET_PRIVATE_KEY}`]
     },
+    networks: {
+      hardhat: {
+        chainId: 1337,
+      },
+    },
     arbitrum_rinkeby: {
       url: `https://arb-rinkeby.g.alchemy.com/v2/${ARBITRUM_RINKEBY_ALCHEMY_KEY}`,
       accounts: [`${WALLET_PRIVATE_KEY}`]

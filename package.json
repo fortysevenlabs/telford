@@ -19,12 +19,14 @@
     "ethers": "^5.6.5",
     "hardhat": "^2.9.5",
     "hardhat-tracer": "^1.1.0-rc.6",
+    "hardhat-console": "^1.0.0",
     "hardhat-watcher": "^2.3.0",
     "solidity-coverage": "^0.7.21"
   },
   "dependencies": {
     "@eth-optimism/contracts": "^0.5.14",
     "@eth-optimism/sdk": "^1.0.1",
+    "@openzeppelin/contracts": "^4.6.0",
     "dotenv": "^16.0.1"
   }
 }
