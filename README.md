@@ -38,9 +38,9 @@ Replace `<network>` with the network you want to deploy to, e.g., `mainnet`, `ko
 
 To run tests for the Telford Bridge, execute the following command:
 
-\```bash
+```bash
 npx hardhat test
-\```
+```
 
 ## Future Work
 
